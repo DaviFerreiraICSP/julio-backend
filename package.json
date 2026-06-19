@@ -1,0 +1,23 @@
+{
+  "name": "julio-thaise-backend",
+  "version": "1.0.0",
+  "description": "Backend do site de casamento Thaise & Julio",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "seed": "node src/seed.js"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "better-sqlite3": "^11.3.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.2",
+    "mercadopago": "^2.0.15",
+    "multer": "^2.2.0",
+    "nodemailer": "^9.0.1"
+  }
+}

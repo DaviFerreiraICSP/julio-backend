@@ -1,0 +1,10 @@
+node_modules/
+.env
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+uploads/gifts/
+uploads/pix/
+*.log
+.DS_Store
