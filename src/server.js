@@ -1,7 +1,7 @@
 import 'dotenv/config'
 
 process.on('uncaughtException', (err) => {
-  console.error('[CRASH] uncaughtException:', err)
+  console.error('[CRASH] uncaughtException:', err.message, err.stack)
   process.exit(1)
 })
 
@@ -10,17 +10,17 @@ process.on('unhandledRejection', (reason) => {
   process.exit(1)
 })
 
-import app from './app.js'
-import { validateEnv } from './config.js'
+try {
+  const { default: app } = await import('./app.js')
+  const { validateEnv } = await import('./config.js')
 
-const PORT = process.env.PORT || 3001
+  await validateEnv()
 
-validateEnv().then(() => {
+  const PORT = process.env.PORT || 3001
   app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`)
-    console.log(`Health: http://localhost:${PORT}/api/health`)
   })
-}).catch(err => {
-  console.error('[CRASH] Falha no startup:', err)
+} catch (err) {
+  console.error('[CRASH] Falha ao iniciar:', err.message, err.stack)
   process.exit(1)
-})
+}

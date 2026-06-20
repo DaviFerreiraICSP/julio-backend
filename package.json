@@ -4,6 +4,9 @@
   "description": "Backend do site de casamento Thaise & Julio",
   "main": "src/server.js",
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
