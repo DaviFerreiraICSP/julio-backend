@@ -220,9 +220,8 @@ router.post('/gifts/:id/image', requireAdmin, upload.single('image'), async (req
   if (!gift) return res.status(404).json({ error: 'Presente não encontrado.' })
   if (!req.file) return res.status(400).json({ error: 'Nenhuma imagem enviada.' })
 
-  // Delete old file if exists
   if (gift.image_url) {
-    const oldPath = join(__dirname, '..', '..', gift.image_url.replace(/^\//, ''))
+    const oldPath = join(DATA_DIR, gift.image_url.replace(/^\//, ''))
     unlink(oldPath).catch(() => {})
   }
 
@@ -237,7 +236,7 @@ router.delete('/gifts/:id/image', requireAdmin, async (req, res) => {
   if (!gift) return res.status(404).json({ error: 'Presente não encontrado.' })
 
   if (gift.image_url) {
-    const filePath = join(__dirname, '..', '..', gift.image_url.replace(/^\//, ''))
+    const filePath = join(DATA_DIR, gift.image_url.replace(/^\//, ''))
     unlink(filePath).catch(() => {})
   }
 
