@@ -3,7 +3,8 @@ import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const DB_PATH = join(__dirname, '..', 'wedding.db')
+const DATA_DIR = process.env.DATA_DIR || join(__dirname, '..')
+const DB_PATH = join(DATA_DIR, 'wedding.db')
 
 const db = new Database(DB_PATH)
 db.pragma('journal_mode = WAL')

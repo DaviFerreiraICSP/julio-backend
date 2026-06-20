@@ -22,7 +22,8 @@ app.use(cors({
 app.use('/api/payments/webhook', express.raw({ type: '*/*' }))
 app.use(express.json())
 
-app.use('/uploads', express.static(join(__dirname, '..', 'uploads')))
+const DATA_DIR = process.env.DATA_DIR || join(__dirname, '..')
+app.use('/uploads', express.static(join(DATA_DIR, 'uploads')))
 app.use('/api/admin', adminRoutes)
 app.use('/api/gifts', giftsRoutes)
 app.use('/api/rsvp', rsvpRoutes)

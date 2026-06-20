@@ -8,9 +8,10 @@ import { requireAdmin } from '../middleware/auth.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
+const DATA_DIR = process.env.DATA_DIR || join(__dirname, '..', '..')
 const upload = multer({
   storage: multer.diskStorage({
-    destination: join(__dirname, '..', '..', 'uploads', 'pix'),
+    destination: join(DATA_DIR, 'uploads', 'pix'),
     filename: (_req, file, _cb) => _cb(null, 'qrcode.png'),
   }),
   limits: { fileSize: 4 * 1024 * 1024 },
@@ -50,7 +51,7 @@ router.post('/qr', requireAdmin, upload.single('qr'), (req, res) => {
 
 // DELETE /api/pix/qr  — remove QR code (admin)
 router.delete('/qr', requireAdmin, async (_req, res) => {
-  const filePath = join(__dirname, '..', '..', 'uploads', 'pix', 'qrcode.png')
+  const filePath = join(DATA_DIR, 'uploads', 'pix', 'qrcode.png')
   unlink(filePath).catch(() => {})
   db.prepare('DELETE FROM settings WHERE key = ?').run('pix_qr_url')
   res.json({ ok: true })

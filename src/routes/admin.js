@@ -13,9 +13,10 @@ import { randomUUID } from 'crypto'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
+const DATA_DIR = process.env.DATA_DIR || join(__dirname, '..', '..')
 const upload = multer({
   storage: multer.diskStorage({
-    destination: join(__dirname, '..', '..', 'uploads', 'gifts'),
+    destination: join(DATA_DIR, 'uploads', 'gifts'),
     filename: (_req, file, cb) => cb(null, `${Date.now()}_${randomUUID().slice(0, 8)}${extname(file.originalname)}`),
   }),
   limits: { fileSize: 8 * 1024 * 1024 },
