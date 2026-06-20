@@ -20,4 +20,15 @@ router.get('/:id', (req, res) => {
   res.json(gift)
 })
 
+// POST /api/gifts/:id/claim — convidado confirma que presenteou
+router.post('/:id/claim', (req, res) => {
+  const { gifted_by } = req.body ?? {}
+  const gift = db.prepare('SELECT id, gifted FROM gifts WHERE id = ? AND active = 1').get(req.params.id)
+  if (!gift) return res.status(404).json({ error: 'Presente não encontrado.' })
+  if (gift.gifted) return res.status(409).json({ error: 'Este presente já foi presenteado.' })
+  db.prepare('UPDATE gifts SET gifted = 1, gifted_by = ?, gifted_at = ? WHERE id = ?')
+    .run(gifted_by?.trim() || 'Convidado', Date.now(), req.params.id)
+  res.json({ ok: true })
+})
+
 export default router
