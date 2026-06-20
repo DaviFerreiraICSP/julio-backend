@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 import db from './db.js'
 
 const DEV_EMAIL = 'davidossantosferreirasilva@gmail.com'

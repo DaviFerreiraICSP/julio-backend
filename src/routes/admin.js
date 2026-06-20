@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import jwt from 'jsonwebtoken'
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 import multer from 'multer'
 import nodemailer from 'nodemailer'
 import { join, extname, dirname } from 'path'
