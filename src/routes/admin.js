@@ -41,7 +41,7 @@ function createMailer() {
 // POST /api/admin/request-reset
 router.post('/request-reset', async (req, res) => {
   const { email } = req.body ?? {}
-  if (!email) return res.status(400).json({ error: 'Email obrigatorio.' })
+  if (!email) return res.status(400).json({ error: 'Email obrigatório.' })
 
   const user = db.prepare('SELECT * FROM users WHERE email = ? AND active = 1').get(email.trim().toLowerCase())
   if (!user) return res.json({ ok: true })
@@ -76,12 +76,12 @@ router.post('/request-reset', async (req, res) => {
 // POST /api/admin/reset-password
 router.post('/reset-password', async (req, res) => {
   const { token, password } = req.body ?? {}
-  if (!token || !password) return res.status(400).json({ error: 'Token e senha obrigatorios.' })
+  if (!token || !password) return res.status(400).json({ error: 'Token e senha obrigatórios.' })
   if (password.length < 6) return res.status(400).json({ error: 'Senha deve ter ao menos 6 caracteres.' })
 
   const reset = db.prepare('SELECT * FROM password_resets WHERE token = ? AND used = 0').get(token)
   if (!reset || reset.expires_at < Date.now()) {
-    return res.status(400).json({ error: 'Link invalido ou expirado.' })
+    return res.status(400).json({ error: 'Link inválido ou expirado.' })
   }
 
   const hash = await bcrypt.hash(password, 10)
@@ -102,9 +102,9 @@ router.get('/users', requireDev, (_req, res) => {
 // POST /api/admin/users
 router.post('/users', requireDev, async (req, res) => {
   const { email, password, role = 'admin' } = req.body ?? {}
-  if (!email || !password) return res.status(400).json({ error: 'Email e senha obrigatorios.' })
+  if (!email || !password) return res.status(400).json({ error: 'Email e senha obrigatórios.' })
   if (password.length < 6) return res.status(400).json({ error: 'Senha deve ter ao menos 6 caracteres.' })
-  if (!['admin', 'dev'].includes(role)) return res.status(400).json({ error: 'Role invalido.' })
+  if (!['admin', 'dev'].includes(role)) return res.status(400).json({ error: 'Role inválido.' })
 
   const exists = db.prepare('SELECT id FROM users WHERE email = ?').get(email.trim().toLowerCase())
   if (exists) return res.status(409).json({ error: 'Este email ja esta cadastrado.' })
@@ -119,7 +119,7 @@ router.post('/users', requireDev, async (req, res) => {
 router.put('/users/:id/toggle', requireDev, (req, res) => {
   const user = db.prepare('SELECT id, role FROM users WHERE id = ?').get(req.params.id)
   if (!user) return res.status(404).json({ error: 'Usuario nao encontrado.' })
-  if (user.role === 'dev') return res.status(400).json({ error: 'Nao e possivel desativar o dev.' })
+  if (user.role === 'dev') return res.status(400).json({ error: 'Não é possível desativar o dev.' })
   db.prepare('UPDATE users SET active = CASE WHEN active = 1 THEN 0 ELSE 1 END WHERE id = ?').run(req.params.id)
   res.json(db.prepare('SELECT id, email, role, active, created_at FROM users WHERE id = ?').get(req.params.id))
 })
@@ -128,7 +128,7 @@ router.put('/users/:id/toggle', requireDev, (req, res) => {
 router.delete('/users/:id', requireDev, (req, res) => {
   const user = db.prepare('SELECT id, role FROM users WHERE id = ?').get(req.params.id)
   if (!user) return res.status(404).json({ error: 'Usuario nao encontrado.' })
-  if (user.role === 'dev') return res.status(400).json({ error: 'Nao e possivel remover o dev.' })
+  if (user.role === 'dev') return res.status(400).json({ error: 'Não é possível remover o dev.' })
   db.prepare('DELETE FROM users WHERE id = ?').run(req.params.id)
   res.json({ ok: true })
 })
@@ -136,7 +136,7 @@ router.delete('/users/:id', requireDev, (req, res) => {
 // POST /api/admin/login
 router.post('/login', async (req, res) => {
   const { username: email, password } = req.body ?? {}
-  if (!email || !password) return res.status(400).json({ error: 'Email e senha obrigatorios.' })
+  if (!email || !password) return res.status(400).json({ error: 'Email e senha obrigatórios.' })
 
   const user = db.prepare('SELECT * FROM users WHERE email = ? AND active = 1').get(email.trim().toLowerCase())
   if (!user) return res.status(401).json({ error: 'Credenciais invalidas.' })
@@ -159,7 +159,7 @@ router.get('/gifts', requireAdmin, (_req, res) => {
 // POST /api/admin/gifts
 router.post('/gifts', requireAdmin, (req, res) => {
   const { name, category, price, icon, sort_order = 0 } = req.body ?? {}
-  if (!name || !category || price == null) return res.status(400).json({ error: 'name, category e price são obrigatórios.' })
+  if (!name || !category || price == null) return res.status(400).json({ error: 'Nome, categoria e preço são obrigatórios.' })
 
   const id = 'gift_' + randomUUID().replace(/-/g, '').slice(0, 8)
   db.prepare(
