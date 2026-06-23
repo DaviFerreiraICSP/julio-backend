@@ -44,6 +44,22 @@ const heroUpload = multer({
   },
 })
 
+const casalUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => {
+      const dir = join(DATA_DIR, 'uploads', 'casal')
+      mkdirSync(dir, { recursive: true })
+      cb(null, dir)
+    },
+    filename: (_req, file, cb) => cb(null, `casal_${Date.now()}${extname(file.originalname)}`),
+  }),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (/^image\/(jpeg|png|webp)$/.test(file.mimetype)) cb(null, true)
+    else cb(new Error('Apenas imagens são permitidas.'))
+  },
+})
+
 const router = Router()
 
 function createMailer() {
@@ -377,6 +393,40 @@ router.delete('/hero-image', requireAdmin, async (_req, res) => {
     unlink(join(DATA_DIR, existing.value.replace(/^\//, ''))).catch(() => {})
   }
   db.prepare('DELETE FROM settings WHERE key = ?').run('hero_image_url')
+  res.json({ ok: true })
+})
+
+// POST /api/admin/casal-image
+router.post('/casal-image', requireAdmin, casalUpload.single('image'), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Nenhuma imagem enviada.' })
+
+  const existing = db.prepare('SELECT value FROM settings WHERE key = ?').get('casal_image_url')
+  if (existing?.value) {
+    unlink(join(DATA_DIR, existing.value.replace(/^\//, ''))).catch(() => {})
+  }
+
+  const imageUrl = `/uploads/casal/${req.file.filename}`
+  db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('casal_image_url', imageUrl)
+  res.json({ casal_image_url: imageUrl })
+})
+
+// DELETE /api/admin/casal-image
+router.delete('/casal-image', requireAdmin, async (_req, res) => {
+  const existing = db.prepare('SELECT value FROM settings WHERE key = ?').get('casal_image_url')
+  if (existing?.value) {
+    unlink(join(DATA_DIR, existing.value.replace(/^\//, ''))).catch(() => {})
+  }
+  db.prepare('DELETE FROM settings WHERE key = ?').run('casal_image_url')
+  res.json({ ok: true })
+})
+
+// PUT /api/admin/site-texts
+router.put('/site-texts', requireAdmin, (req, res) => {
+  const texts = req.body ?? {}
+  if (typeof texts !== 'object' || Array.isArray(texts)) {
+    return res.status(400).json({ error: 'Corpo inválido.' })
+  }
+  db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('site_texts', JSON.stringify(texts))
   res.json({ ok: true })
 })
 
