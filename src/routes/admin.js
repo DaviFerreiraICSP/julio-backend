@@ -6,6 +6,7 @@ import nodemailer from 'nodemailer'
 import { join, extname, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { unlink } from 'fs/promises'
+import { mkdirSync } from 'fs'
 import db from '../db.js'
 import { requireAdmin, requireDev } from '../middleware/auth.js'
 import { refreshPasswordHash } from '../config.js'
@@ -14,6 +15,7 @@ import { randomUUID } from 'crypto'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
 const DATA_DIR = process.env.DATA_DIR || join(__dirname, '..', '..')
+
 const upload = multer({
   storage: multer.diskStorage({
     destination: join(DATA_DIR, 'uploads', 'gifts'),
@@ -22,6 +24,22 @@ const upload = multer({
   limits: { fileSize: 8 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (/^image\/(jpeg|png|webp|gif)$/.test(file.mimetype)) cb(null, true)
+    else cb(new Error('Apenas imagens são permitidas.'))
+  },
+})
+
+const heroUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => {
+      const dir = join(DATA_DIR, 'uploads', 'hero')
+      mkdirSync(dir, { recursive: true })
+      cb(null, dir)
+    },
+    filename: (_req, file, cb) => cb(null, `hero_${Date.now()}${extname(file.originalname)}`),
+  }),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (/^image\/(jpeg|png|webp)$/.test(file.mimetype)) cb(null, true)
     else cb(new Error('Apenas imagens são permitidas.'))
   },
 })
@@ -335,6 +353,30 @@ router.get('/messages', requireAdmin, (_req, res) => {
 // DELETE /api/admin/messages/:id
 router.delete('/messages/:id', requireAdmin, (req, res) => {
   db.prepare('DELETE FROM messages WHERE id = ?').run(req.params.id)
+  res.json({ ok: true })
+})
+
+// POST /api/admin/hero-image
+router.post('/hero-image', requireAdmin, heroUpload.single('image'), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Nenhuma imagem enviada.' })
+
+  const existing = db.prepare('SELECT value FROM settings WHERE key = ?').get('hero_image_url')
+  if (existing?.value) {
+    unlink(join(DATA_DIR, existing.value.replace(/^\//, ''))).catch(() => {})
+  }
+
+  const imageUrl = `/uploads/hero/${req.file.filename}`
+  db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('hero_image_url', imageUrl)
+  res.json({ hero_image_url: imageUrl })
+})
+
+// DELETE /api/admin/hero-image
+router.delete('/hero-image', requireAdmin, async (_req, res) => {
+  const existing = db.prepare('SELECT value FROM settings WHERE key = ?').get('hero_image_url')
+  if (existing?.value) {
+    unlink(join(DATA_DIR, existing.value.replace(/^\//, ''))).catch(() => {})
+  }
+  db.prepare('DELETE FROM settings WHERE key = ?').run('hero_image_url')
   res.json({ ok: true })
 })
 

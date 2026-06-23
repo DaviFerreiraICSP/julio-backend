@@ -9,6 +9,7 @@ import invitesRoutes from './routes/invites.js'
 import messagesRoutes from './routes/messages.js'
 import paymentsRoutes from './routes/payments.js'
 import pixRoutes from './routes/pix.js'
+import settingsRoutes from './routes/settings.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -32,6 +33,7 @@ app.use('/api/invites', invitesRoutes)
 app.use('/api/messages', messagesRoutes)
 app.use('/api/payments', paymentsRoutes)
 app.use('/api/pix', pixRoutes)
+app.use('/api/settings', settingsRoutes)
 
 app.get('/api/health', (_req, res) => res.json({ ok: true, ts: Date.now() }))
 
