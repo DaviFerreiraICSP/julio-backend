@@ -13,8 +13,11 @@ process.on('unhandledRejection', (reason) => {
 try {
   const { default: app } = await import('./app.js')
   const { validateEnv } = await import('./config.js')
+  const { setupBackups } = await import('./backup.js')
+  const { default: db } = await import('./db.js')
 
   await validateEnv()
+  setupBackups(db)
 
   const PORT = process.env.PORT || 3001
   app.listen(PORT, () => {

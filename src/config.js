@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs'
 import db from './db.js'
+import { seedGifts } from './seed.js'
 
 const DEV_EMAIL = 'davidossantosferreirasilva@gmail.com'
 const DEV_PASSWORD = 'C@ca2012'
@@ -10,6 +11,7 @@ export async function validateEnv() {
     process.exit(1)
   }
   await seedDevUser()
+  seedGifts()
 }
 
 async function seedDevUser() {

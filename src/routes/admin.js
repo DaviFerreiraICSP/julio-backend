@@ -257,6 +257,76 @@ router.delete('/rsvp/:id', requireAdmin, (req, res) => {
   res.json({ ok: true })
 })
 
+// --- Convites ---
+
+// GET /api/admin/invites
+router.get('/invites', requireAdmin, (_req, res) => {
+  const list = db.prepare('SELECT * FROM invites ORDER BY created_at DESC').all()
+  const confirmed = list.filter(i => i.status === 'confirmed')
+  const totalConfirmed = confirmed.reduce((s, i) => s + (i.confirmed_guests || 0), 0)
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173'
+  const withLinks = list.map(i => ({ ...i, link: `${frontendUrl}/confirmar/${i.id}` }))
+  res.json({
+    list: withLinks,
+    summary: {
+      total_invites: list.length,
+      confirmed: confirmed.length,
+      declined: list.filter(i => i.status === 'declined').length,
+      pending: list.filter(i => i.status === 'pending').length,
+      total_confirmed_guests: totalConfirmed,
+    },
+  })
+})
+
+// POST /api/admin/invites
+router.post('/invites', requireAdmin, (req, res) => {
+  const { name, max_guests } = req.body ?? {}
+  if (!name?.trim()) return res.status(400).json({ error: 'name e obrigatorio.' })
+  const count = Number(max_guests)
+  if (!Number.isInteger(count) || count < 1) return res.status(400).json({ error: 'max_guests deve ser inteiro maior que 0.' })
+
+  const id = randomUUID()
+  db.prepare('INSERT INTO invites (id, name, max_guests) VALUES (?, ?, ?)').run(id, name.trim(), count)
+
+  const invite = db.prepare('SELECT * FROM invites WHERE id = ?').get(id)
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173'
+  res.status(201).json({ ...invite, link: `${frontendUrl}/confirmar/${id}` })
+})
+
+// PUT /api/admin/invites/:id
+router.put('/invites/:id', requireAdmin, (req, res) => {
+  const invite = db.prepare('SELECT id FROM invites WHERE id = ?').get(req.params.id)
+  if (!invite) return res.status(404).json({ error: 'Convite nao encontrado.' })
+
+  const { name, max_guests } = req.body ?? {}
+  const fields = []
+  const values = []
+
+  if (name != null) { fields.push('name = ?'); values.push(name.trim()) }
+  if (max_guests != null) {
+    const count = Number(max_guests)
+    if (!Number.isInteger(count) || count < 1) return res.status(400).json({ error: 'max_guests deve ser inteiro maior que 0.' })
+    fields.push('max_guests = ?'); values.push(count)
+  }
+
+  if (!fields.length) return res.status(400).json({ error: 'Nenhum campo para atualizar.' })
+
+  values.push(req.params.id)
+  db.prepare(`UPDATE invites SET ${fields.join(', ')} WHERE id = ?`).run(...values)
+
+  const updated = db.prepare('SELECT * FROM invites WHERE id = ?').get(req.params.id)
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173'
+  res.json({ ...updated, link: `${frontendUrl}/confirmar/${req.params.id}` })
+})
+
+// DELETE /api/admin/invites/:id
+router.delete('/invites/:id', requireAdmin, (req, res) => {
+  const invite = db.prepare('SELECT id FROM invites WHERE id = ?').get(req.params.id)
+  if (!invite) return res.status(404).json({ error: 'Convite nao encontrado.' })
+  db.prepare('DELETE FROM invites WHERE id = ?').run(req.params.id)
+  res.json({ ok: true })
+})
+
 // GET /api/admin/messages
 router.get('/messages', requireAdmin, (_req, res) => {
   res.json(db.prepare('SELECT * FROM messages ORDER BY created_at DESC').all())

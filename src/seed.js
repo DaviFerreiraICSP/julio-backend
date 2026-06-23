@@ -117,7 +117,17 @@ const insertMany = db.transaction((items) => {
   for (const item of items) insert.run(item)
 })
 
-insertMany(gifts)
+export function seedGifts() {
+  const { count } = db.prepare('SELECT COUNT(*) AS count FROM gifts').get()
+  if (count > 0) return
+  insertMany(gifts)
+  const { count: final } = db.prepare('SELECT COUNT(*) AS count FROM gifts').get()
+  console.log(`[seed] ${final} presentes inseridos.`)
+}
 
-const { count } = db.prepare('SELECT COUNT(*) AS count FROM gifts').get()
-console.log(`✅ Seed concluído — ${count} presentes na tabela.`)
+// permite rodar direto: node src/seed.js
+if (process.argv[1].endsWith('seed.js')) {
+  insertMany(gifts)
+  const { count } = db.prepare('SELECT COUNT(*) AS count FROM gifts').get()
+  console.log(`Seed concluido — ${count} presentes na tabela.`)
+}

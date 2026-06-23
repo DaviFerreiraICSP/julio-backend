@@ -55,6 +55,19 @@ db.exec(`
   );
 `)
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS invites (
+    id               TEXT PRIMARY KEY,
+    name             TEXT NOT NULL,
+    max_guests       INTEGER NOT NULL DEFAULT 1,
+    status           TEXT NOT NULL DEFAULT 'pending',
+    confirmed_guests INTEGER,
+    notes            TEXT,
+    confirmed_at     INTEGER,
+    created_at       INTEGER NOT NULL DEFAULT (unixepoch() * 1000)
+  );
+`)
+
 // Migrations
 try { db.exec('ALTER TABLE gifts ADD COLUMN image_url TEXT') } catch {}
 try { db.exec('ALTER TABLE rsvp ADD COLUMN email TEXT') } catch {}

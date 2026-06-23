@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url'
 import adminRoutes from './routes/admin.js'
 import giftsRoutes from './routes/gifts.js'
 import rsvpRoutes from './routes/rsvp.js'
+import invitesRoutes from './routes/invites.js'
 import messagesRoutes from './routes/messages.js'
 import paymentsRoutes from './routes/payments.js'
 import pixRoutes from './routes/pix.js'
@@ -27,6 +28,7 @@ app.use('/uploads', express.static(join(DATA_DIR, 'uploads')))
 app.use('/api/admin', adminRoutes)
 app.use('/api/gifts', giftsRoutes)
 app.use('/api/rsvp', rsvpRoutes)
+app.use('/api/invites', invitesRoutes)
 app.use('/api/messages', messagesRoutes)
 app.use('/api/payments', paymentsRoutes)
 app.use('/api/pix', pixRoutes)
