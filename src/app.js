@@ -25,7 +25,7 @@ app.use('/api/payments/webhook', express.raw({ type: '*/*' }))
 app.use(express.json())
 
 const DATA_DIR = process.env.DATA_DIR || join(__dirname, '..')
-app.use('/uploads', express.static(join(DATA_DIR, 'uploads')))
+app.use('/uploads', express.static(join(DATA_DIR, 'uploads'), { maxAge: '7d' }))
 app.use('/api/admin', adminRoutes)
 app.use('/api/gifts', giftsRoutes)
 app.use('/api/rsvp', rsvpRoutes)
