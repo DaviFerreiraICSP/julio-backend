@@ -226,11 +226,11 @@ router.put('/gifts/:id', requireAdmin, (req, res) => {
   res.json(db.prepare('SELECT * FROM gifts WHERE id = ?').get(req.params.id))
 })
 
-// DELETE /api/admin/gifts/:id
+// DELETE /api/admin/gifts/:id — soft delete
 router.delete('/gifts/:id', requireAdmin, (req, res) => {
-  const gift = db.prepare('SELECT id FROM gifts WHERE id = ?').get(req.params.id)
+  const gift = db.prepare('SELECT id FROM gifts WHERE id = ? AND active = 1').get(req.params.id)
   if (!gift) return res.status(404).json({ error: 'Presente não encontrado.' })
-  db.prepare('DELETE FROM gifts WHERE id = ?').run(req.params.id)
+  db.prepare('UPDATE gifts SET active = 0 WHERE id = ?').run(req.params.id)
   res.json({ ok: true })
 })
 
