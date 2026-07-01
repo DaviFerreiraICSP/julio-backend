@@ -71,6 +71,8 @@ db.exec(`
 // Migrations
 try { db.exec('ALTER TABLE gifts ADD COLUMN image_url TEXT') } catch {}
 try { db.exec('ALTER TABLE rsvp ADD COLUMN email TEXT') } catch {}
+try { db.exec('ALTER TABLE payments ADD COLUMN stripe_payment_intent_id TEXT') } catch {}
+try { db.exec('ALTER TABLE payments ADD COLUMN payment_method TEXT DEFAULT \'pix\'') } catch {}
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (

@@ -8,6 +8,7 @@ import rsvpRoutes from './routes/rsvp.js'
 import invitesRoutes from './routes/invites.js'
 import messagesRoutes from './routes/messages.js'
 import paymentsRoutes from './routes/payments.js'
+import stripeRoutes from './routes/stripe.js'
 import pixRoutes from './routes/pix.js'
 import settingsRoutes from './routes/settings.js'
 
@@ -20,8 +21,9 @@ app.use(cors({
   credentials: true,
 }))
 
-// Webhook do Mercado Pago precisa do corpo raw
+// Webhooks precisam do corpo raw antes do express.json()
 app.use('/api/payments/webhook', express.raw({ type: '*/*' }))
+app.use('/api/payments/stripe/webhook', express.raw({ type: 'application/json' }))
 app.use(express.json())
 
 const DATA_DIR = process.env.DATA_DIR || join(__dirname, '..')
@@ -31,6 +33,7 @@ app.use('/api/gifts', giftsRoutes)
 app.use('/api/rsvp', rsvpRoutes)
 app.use('/api/invites', invitesRoutes)
 app.use('/api/messages', messagesRoutes)
+app.use('/api/payments/stripe', stripeRoutes)
 app.use('/api/payments', paymentsRoutes)
 app.use('/api/pix', pixRoutes)
 app.use('/api/settings', settingsRoutes)
