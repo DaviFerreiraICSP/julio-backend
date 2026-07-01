@@ -31,6 +31,9 @@ router.post('/create-intent', async (req, res) => {
       description: `Presente: ${gift.name} - Casamento Thaise & Julio`,
       metadata: { gift_id, payer_name, payer_email },
       receipt_email: payer_email,
+      payment_method_options: {
+        card: { installments: { enabled: true } },
+      },
     })
 
     const paymentId = randomUUID()
